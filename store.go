@@ -91,6 +91,10 @@ func (s *Store) Delete(key string) error {
 	return os.RemoveAll(s.Root) // To get First parent directory name
 }
 
+func (s *Store) Write(key string, r io.Reader) error {
+	return s.writeStream(key, r)
+}
+
 func (s *Store) Read(key string) (io.Reader, error) {
 	f, err := s.readStream(key)
 	if err != nil {
