@@ -34,7 +34,8 @@ type Message struct {
 }
 
 type MessageStoreFile struct {
-	Key string
+	Key  string
+	Size int64
 }
 
 func NewFileServer(opts FileServerOpts) *FileServer {
@@ -68,7 +69,8 @@ func (s *FileServer) StoreData(key string, r io.Reader) error {
 
 	msg := Message{
 		Payload: MessageStoreFile{
-			Key: key,
+			Key:  key,
+			Size: 15,
 		},
 	}
 	if err := gob.NewEncoder(buf).Encode(msg); err != nil {
@@ -138,7 +140,7 @@ func (s *FileServer) handleMessageStoreFile(from string, msg MessageStoreFile) e
 		return fmt.Errorf("peer (%s) could not be found in the peer list", from)
 	}
 
-	if err := s.store.Write(msg.Key, peer); err != nil {
+	if err := s.store.Write(msg.Key, io.LimitReader(peer, msg.Size)); err != nil {
 		return err
 	}
 
